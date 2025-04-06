@@ -16,13 +16,12 @@ resource "google_container_cluster" "gke_standard" {
   name     = "gke-standard-cluster"
   location = "us-central1"
 
-  enable_autopilot = false  # Standard Cluster Mode
+  enable_autopilot = false
 
-  # IP allocation for VPC-native networking
   networking_mode = "VPC_NATIVE"
   ip_allocation_policy {}
 
-  initial_node_count = 1  # FIX: Set to 1 to avoid the error
+  initial_node_count = 1
 }
 
 resource "google_container_node_pool" "primary_nodes" {
@@ -32,8 +31,8 @@ resource "google_container_node_pool" "primary_nodes" {
   node_count = 1
 
   node_config {
-    machine_type = "e2-medium"
-    disk_size_gb = 50
+    machine_type = "e2-small"  # 🔹 Changed from e2-medium to e2-small to reduce resource usage
+    disk_size_gb = 20          # 🔹 Reduced disk size from 50GB to 20GB to fit within quota
     oauth_scopes = [
       "https://www.googleapis.com/auth/cloud-platform"
     ]
