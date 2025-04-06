@@ -21,6 +21,8 @@ resource "google_container_cluster" "gke_standard" {
   # IP allocation for VPC-native networking
   networking_mode = "VPC_NATIVE"
   ip_allocation_policy {}
+
+  initial_node_count = 1  # FIX: Set to 1 to avoid the error
 }
 
 resource "google_container_node_pool" "primary_nodes" {
@@ -40,7 +42,6 @@ resource "google_container_node_pool" "primary_nodes" {
     }
   }
 
-  # Move the management block outside of node_config
   management {
     auto_repair  = true
     auto_upgrade = true
