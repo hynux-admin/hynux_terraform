@@ -8,7 +8,7 @@ resource "google_container_cluster" "gke_standard" {
   location = "us-central1"
 
   remove_default_node_pool = true
-  initial_node_count       = 1  # Required but won't create default nodes
+  initial_node_count       = 1
 
   networking_mode = "VPC_NATIVE"
   ip_allocation_policy {}
@@ -21,8 +21,8 @@ resource "google_container_node_pool" "primary_nodes" {
   node_count = 1  
 
   node_config {
-    machine_type = "e2-small"  # Small instance to fit quotas
-    disk_size_gb = 20          # ✅ Reduced to fit within your 250 GB quota
+    machine_type = "e2-small"  
+    disk_size_gb = 10  # 🔹 Reduce SSD usage (change if needed)
     disk_type    = "pd-ssd"
     oauth_scopes = ["https://www.googleapis.com/auth/cloud-platform"]
   }
