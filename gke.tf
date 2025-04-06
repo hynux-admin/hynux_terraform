@@ -16,11 +16,10 @@ resource "google_container_cluster" "gke_standard" {
   name     = "gke-standard-cluster"
   location = "us-central1"
 
-  remove_default_node_pool = true
-  initial_node_count       = 1
+  remove_default_node_pool = true  # This is allowed only when Autopilot is disabled
+  enable_autopilot         = false # Ensuring it's a Standard GKE cluster
 
   networking_mode = "VPC_NATIVE"
-  enable_autopilot = false
 
   ip_allocation_policy {}
 }
