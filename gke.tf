@@ -38,8 +38,10 @@ resource "google_container_node_pool" "primary_nodes" {
     metadata = {
       disable-legacy-endpoints = "true"
     }
-    preemptible  = false
-    auto_repair  = true
-    auto_upgrade = true
+
+    management {
+      auto_repair  = true
+      auto_upgrade = true
+    }
   }
 }
