@@ -38,10 +38,11 @@ resource "google_container_node_pool" "primary_nodes" {
     metadata = {
       disable-legacy-endpoints = "true"
     }
+  }
 
-    management {
-      auto_repair  = true
-      auto_upgrade = true
-    }
+  # Move the management block outside of node_config
+  management {
+    auto_repair  = true
+    auto_upgrade = true
   }
 }
