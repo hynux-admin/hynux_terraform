@@ -3,7 +3,8 @@ provider "google" {
   region  = "us-central1"
   zone    = "us-central1-c"
 }
-
+  # 🔻 Disable deletion protection
+  deletion_protection = false
 # ✅ Create a Service Account for GKE Nodes
 resource "google_service_account" "gke_service_account" {
   account_id   = "gke-service-account"
