@@ -19,15 +19,14 @@ resource "google_project_iam_member" "gke_service_account_role" {
 
 # ✅ GKE Cluster (Zonal)
 resource "google_container_cluster" "gke_standard" {
-  name     = "hynux-gke-cluster"
-  location = "us-central1-c"
+  name                     = "hynux-gke-cluster"
+  location                 = "us-central1-c"
   remove_default_node_pool = true
   initial_node_count       = 1
 
   networking_mode = "VPC_NATIVE"
   ip_allocation_policy {}
 
-  # ✅ Logging and Monitoring
   logging_config {
     enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
   }
@@ -36,7 +35,6 @@ resource "google_container_cluster" "gke_standard" {
     enable_components = ["SYSTEM_COMPONENTS"]
   }
 
-  # ✅ Private Cluster Configuration (optional, secure)
   private_cluster_config {
     enable_private_nodes    = true
     master_ipv4_cidr_block  = "172.16.0.0/28"
@@ -75,7 +73,7 @@ resource "google_container_node_pool" "primary_nodes" {
   }
 }
 
-# ✅ Optional: Special Node Pool (for high-memory or custom workloads)
+# ✅ Special Node Pool (for high-memory workloads)
 resource "google_container_node_pool" "special_nodes" {
   name       = "special-node-pool"
   location   = "us-central1-c"
@@ -93,7 +91,7 @@ resource "google_container_node_pool" "special_nodes" {
     ]
 
     workload_metadata_config {
-      mode = "GKE_METADATA"
+      mode = "MODE_UNSPECIFIED"
     }
   }
 
