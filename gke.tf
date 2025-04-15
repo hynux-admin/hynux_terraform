@@ -1,5 +1,5 @@
 provider "google" {
-  project = "custom-altar-455808-t3"
+  project = "vertical-dryad-453009-u5"
   region  = "us-central1"
   zone    = "us-central1-c"
 }
@@ -19,7 +19,7 @@ resource "google_project_iam_member" "gke_service_account_role" {
 
 # ✅ GKE Cluster (Zonal)
 resource "google_container_cluster" "gke_standard" {
-  name                     = "hynux-gke-cluster"
+  name                     = "meddir-gke-cluster"
   location                 = "us-central1-c"
   remove_default_node_pool = true
   initial_node_count       = 1
@@ -57,7 +57,7 @@ resource "google_container_node_pool" "primary_nodes" {
 
   node_config {
     machine_type = "e2-standard-4"
-    disk_size_gb = 10
+    disk_size_gb = 40
     disk_type    = "pd-balanced"
     service_account = google_service_account.gke_service_account.email
 
@@ -73,33 +73,5 @@ resource "google_container_node_pool" "primary_nodes" {
   autoscaling {
     min_node_count = 1
     max_node_count = 3
-  }
-}
-
-# ✅ Special Node Pool (for high-memory workloads)
-resource "google_container_node_pool" "special_nodes" {
-  name       = "special-node-pool"
-  location   = "us-central1-c"
-  cluster    = google_container_cluster.gke_standard.name
-  node_count = 0  # Start with zero nodes
-
-  node_config {
-    machine_type = "n1-highmem-2"
-    disk_size_gb = 10
-    disk_type    = "pd-balanced"
-    service_account = google_service_account.gke_service_account.email
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    workload_metadata_config {
-      mode = "MODE_UNSPECIFIED"
-    }
-  }
-
-  autoscaling {
-    min_node_count = 0
-    max_node_count = 5
   }
 }
