@@ -12,7 +12,7 @@ resource "google_service_account" "gke_service_account" {
 
 # ✅ Grant IAM role to GKE Service Account
 resource "google_project_iam_member" "gke_service_account_role" {
-  project = "custom-altar-455808-t3"
+  project = "vertical-dryad-453009-u5"
   role    = "roles/container.clusterViewer"
   member  = "serviceAccount:${google_service_account.gke_service_account.email}"
 }
