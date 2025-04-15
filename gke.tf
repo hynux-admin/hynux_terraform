@@ -3,8 +3,7 @@ provider "google" {
   region  = "us-central1"
   zone    = "us-central1-c"
 }
-  # 🔻 Disable deletion protection
-  deletion_protection = false
+
 # ✅ Create a Service Account for GKE Nodes
 resource "google_service_account" "gke_service_account" {
   account_id   = "gke-service-account"
@@ -24,6 +23,9 @@ resource "google_container_cluster" "gke_standard" {
   location                 = "us-central1-c"
   remove_default_node_pool = true
   initial_node_count       = 1
+
+  # 🔻 Disable deletion protection
+  deletion_protection = false
 
   networking_mode = "VPC_NATIVE"
   ip_allocation_policy {}
