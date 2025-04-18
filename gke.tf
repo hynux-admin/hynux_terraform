@@ -72,6 +72,10 @@ resource "google_container_cluster" "gke_standard" {
   release_channel {
     channel = "REGULAR"
   }
+
+  workload_identity_config {
+    workload_pool = "keen-petal-457212-c4.svc.id.goog"
+  }
 }
 
 # ✅ Primary Node Pool
@@ -83,7 +87,7 @@ resource "google_container_node_pool" "primary_nodes" {
 
   node_config {
     machine_type    = "e2-standard-4"
-    disk_size_gb    = 100
+    disk_size_gb    = 40
     disk_type       = "pd-balanced"
     service_account = google_service_account.gke_service_account.email
 
