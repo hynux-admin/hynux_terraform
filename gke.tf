@@ -1,34 +1,60 @@
 provider "google" {
-  project = "custom-altar-455808-t3"
-  region  = "us-central1"
-  zone    = "us-central1-c"
+  project = "keen-petal-457212-c4"
+  region  = "asia-east1"
+  zone    = "asia-east1-a"
 }
 
-# ✅ Create a Service Account for GKE Nodes
+# ✅ Custom VPC with max subnet ranges
+resource "google_compute_network" "vpc_network" {
+  name                    = "gke-vpc"
+  auto_create_subnetworks = false
+}
+
+resource "google_compute_subnetwork" "gke_subnet" {
+  name          = "gke-subnet"
+  ip_cidr_range = "10.0.0.0/16"
+  region        = "asia-east1"
+  network       = google_compute_network.vpc_network.id
+
+  secondary_ip_range {
+    range_name    = "gke-pods"
+    ip_cidr_range = "10.1.0.0/16"
+  }
+
+  secondary_ip_range {
+    range_name    = "gke-services"
+    ip_cidr_range = "10.2.0.0/20"
+  }
+}
+
+# ✅ GKE Service Account
 resource "google_service_account" "gke_service_account" {
   account_id   = "gke-service-account"
   display_name = "GKE Service Account"
 }
 
-# ✅ Grant IAM role to GKE Service Account
+# ✅ IAM role for the service account
 resource "google_project_iam_member" "gke_service_account_role" {
-  project = "custom-altar-455808-t3"
+  project = "keen-petal-457212-c4"
   role    = "roles/container.clusterViewer"
   member  = "serviceAccount:${google_service_account.gke_service_account.email}"
 }
 
-# ✅ GKE Cluster (Zonal)
+# ✅ GKE Private Cluster
 resource "google_container_cluster" "gke_standard" {
   name                     = "hynux-gke-cluster"
-  location                 = "us-central1-c"
+  location                 = "asia-east1-a"
+  network                  = google_compute_network.vpc_network.id
+  subnetwork               = google_compute_subnetwork.gke_subnet.id
   remove_default_node_pool = true
   initial_node_count       = 1
+  networking_mode          = "VPC_NATIVE"
+  deletion_protection      = false
 
-  # 🔻 Disable deletion protection
-  deletion_protection = false
-
-  networking_mode = "VPC_NATIVE"
-  ip_allocation_policy {}
+  ip_allocation_policy {
+    cluster_secondary_range_name  = "gke-pods"
+    services_secondary_range_name = "gke-services"
+  }
 
   logging_config {
     enable_components = ["SYSTEM_COMPONENTS", "WORKLOADS"]
@@ -39,8 +65,8 @@ resource "google_container_cluster" "gke_standard" {
   }
 
   private_cluster_config {
-    enable_private_nodes    = true
-    master_ipv4_cidr_block  = "172.16.0.0/28"
+    enable_private_nodes   = true
+    master_ipv4_cidr_block = "172.16.0.0/20"
   }
 
   release_channel {
@@ -51,14 +77,14 @@ resource "google_container_cluster" "gke_standard" {
 # ✅ Primary Node Pool
 resource "google_container_node_pool" "primary_nodes" {
   name       = "primary-node-pool"
-  location   = "us-central1-c"
+  location   = "asia-east1-a"
   cluster    = google_container_cluster.gke_standard.name
   node_count = 1
 
   node_config {
-    machine_type = "e2-standard-4"
-    disk_size_gb = 10
-    disk_type    = "pd-balanced"
+    machine_type    = "e2-standard-4"
+    disk_size_gb    = 100
+    disk_type       = "pd-balanced"
     service_account = google_service_account.gke_service_account.email
 
     oauth_scopes = [
@@ -66,40 +92,12 @@ resource "google_container_node_pool" "primary_nodes" {
     ]
 
     workload_metadata_config {
-      mode = "MODE_UNSPECIFIED"
+      mode = "GKE_METADATA"
     }
   }
 
   autoscaling {
     min_node_count = 1
     max_node_count = 3
-  }
-}
-
-# ✅ Special Node Pool (for high-memory workloads)
-resource "google_container_node_pool" "special_nodes" {
-  name       = "special-node-pool"
-  location   = "us-central1-c"
-  cluster    = google_container_cluster.gke_standard.name
-  node_count = 0  # Start with zero nodes
-
-  node_config {
-    machine_type = "n1-highmem-2"
-    disk_size_gb = 10
-    disk_type    = "pd-balanced"
-    service_account = google_service_account.gke_service_account.email
-
-    oauth_scopes = [
-      "https://www.googleapis.com/auth/cloud-platform"
-    ]
-
-    workload_metadata_config {
-      mode = "MODE_UNSPECIFIED"
-    }
-  }
-
-  autoscaling {
-    min_node_count = 0
-    max_node_count = 5
   }
 }
