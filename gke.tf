@@ -66,7 +66,7 @@ resource "google_container_cluster" "gke_standard" {
 
   private_cluster_config {
     enable_private_nodes   = true
-    master_ipv4_cidr_block = "172.16.0.0/20"
+    master_ipv4_cidr_block = "172.16.0.0/28"
   }
 
   release_channel {
